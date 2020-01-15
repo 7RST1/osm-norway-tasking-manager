@@ -4,24 +4,18 @@ import { FormattedMessage, FormattedNumber } from 'react-intl';
 import messages from './messages';
 import { PROFILE_RELEVANT_FIELDS } from './forms';
 
-function CompletenessProgressBar({ completeness }: Object) {
+export function CompletenessProgressBar(props: Object) {
   return (
     <>
       <div className="cf db">
         <div className="w-90 pr2 pt2 fl relative">
           <div
-            className={'absolute bg-red br-pill hhalf hide-child'}
-            style={{ width: `${completeness.toPrecision(3) * 100}%` }}
+            className={'absolute br-pill hhalf hide-child ' + props.color}
+            style={{ width: `${props.completeness.toPrecision(3) * 100}%` }}
           ></div>
           <div className={'bg-grey-light br-pill hhalf hide-child overflow-y-hidden'}></div>
         </div>
-        <div className="w-10 fl pl1 fw6">
-          <FormattedNumber
-            value={completeness}
-            maximumFractionDigits={0}
-            style="percent" // eslint-disable-line react/style-prop-object
-          />
-        </div>
+        {props.children}
       </div>
     </>
   );
@@ -47,7 +41,15 @@ export function ProfileCompleteness({ userDetails }: Object) {
         )}
         {completeness === 1 && <FormattedMessage {...messages.completenessLead2} />}
       </p>
-      <CompletenessProgressBar completeness={completeness} />
+      <CompletenessProgressBar completeness={completeness} color="bg-red">
+        <div className="w-10 fl pl1 fw6">
+          <FormattedNumber
+            value={completeness}
+            maximumFractionDigits={0}
+            style="percent" // eslint-disable-line react/style-prop-object
+          />
+        </div>
+      </CompletenessProgressBar>
     </div>
   );
 }
