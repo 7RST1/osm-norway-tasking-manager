@@ -241,8 +241,10 @@ class UserService:
             )
 
         if project_status:
+            print(project_status)
             tasks = tasks.filter(
-                Task.task_status == ProjectStatus[project_status.upper()].value
+                Task.project_id == Project.id,
+                Project.status == ProjectStatus[project_status.upper()].value,
             )
 
         if project_id:
