@@ -63,6 +63,14 @@ class UsersTasksAPI(Resource):
               required: false
               type: string
               default: null
+            - in: query
+              name: page
+              description: Page of results user requested
+              type: integer
+            - in: query
+              name: pageSize
+              description: Size of page, defaults to 10
+              type: integer
         responses:
             200:
                 description: Mapped projects found
@@ -95,6 +103,8 @@ class UsersTasksAPI(Resource):
                 task_status=task_status,
                 start_date=start_date,
                 end_date=end_date,
+                page=request.args.get("page", None, type=int),
+                page_size=request.args.get("pageSize", None, type=int),
                 sort_by=sort_by,
             )
             return tasks.to_primitive(), 200
