@@ -308,6 +308,57 @@ class UserRecommendedProjectsAPI(Resource):
             return {"Error": error_msg}, 500
 
 
+class UserCountriesMostContributedAPI(Resource):
+    def get(self, username):
+        """
+        Get the most contributed countries from a user.
+        ---
+        tags:
+          - users
+        produces:
+          - application/json
+        parameters:
+            - in: header
+              name: Accept-Language
+              description: Language user is requesting
+              type: string
+              required: true
+              default: en
+            - in: header
+              name: Authorization
+              description: Base64 encoded session token
+              required: true
+              type: string
+              default: Token sessionTokenHere==
+            - name: username
+              in: path
+              description: Mapper's OpenStreetMap username
+              required: true
+              type: string
+              default: Thinkwhere
+        responses:
+            200:
+                description: Countries most contributed
+            401:
+                description: Unauthorized - Invalid credentials
+            403:
+                description: Forbidden
+            404:
+                description: User not found
+            500:
+                description: Internal Server Error
+        """
+        try:
+            user_countries_dto = UserService.get_countries_contributed(username)
+            return user_countries_dto.to_primitive(), 200
+        except NotFound:
+            return {"Error": "User found"}, 404
+        except Exception as e:
+            error_msg = f"User GET - unhandled error: {str(e)}"
+            current_app.logger.critical(error_msg)
+            return {"Error": error_msg}, 500
+
+
 class UserInterestsAPI(Resource):
     @token_auth.login_required
     def get(self, username):

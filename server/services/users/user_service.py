@@ -16,6 +16,8 @@ from server.models.dtos.user_dto import (
     RecommendedProject,
     UserRecommendedProjectsDTO,
     UserRegisterEmailDTO,
+    UserCountryContributed,
+    UserCountriesContributed,
 )
 from server.models.dtos.interests_dto import InterestsDTO
 from server.models.postgis.interests import Interest
@@ -397,6 +399,65 @@ class UserService:
     def upsert_mapped_projects(user_id: int, project_id: int):
         """ Add project to mapped projects if it doesn't exist, otherwise return """
         User.upsert_mapped_projects(user_id, project_id)
+
+    @staticmethod
+    def get_countries_contributed(user_name: str):
+        user = UserService.get_user_by_username(user_name)
+
+        query = (
+            TaskHistory.query.with_entities(
+                func.unnest(Project.country).label("country"),
+                TaskHistory.action_text,
+                func.count(TaskHistory.action_text).label("count"),
+            )
+            .filter(TaskHistory.user_id == user.id)
+            .filter(
+                TaskHistory.action_text.in_(
+                    [
+                        TaskStatus.MAPPED.name,
+                        TaskStatus.BADIMAGERY.name,
+                        TaskStatus.VALIDATED.name,
+                    ]
+                )
+            )
+            .group_by("country", TaskHistory.action_text)
+            .outerjoin(Project, Project.id == TaskHistory.project_id)
+            .all()
+        )
+        countries = list(set([q.country for q in query]))
+        result = []
+        for country in countries:
+            values = [q for q in query if q.country == country]
+
+            # Filter element to sum mapped values.
+            mapped = sum(
+                [
+                    v.count
+                    for v in values
+                    if v.action_text
+                    in [TaskStatus.MAPPED.name, TaskStatus.BADIMAGERY.name]
+                ]
+            )
+            validated = sum(
+                [v.count for v in values if v.action_text == TaskStatus.VALIDATED.name]
+            )
+            dto = UserCountryContributed(
+                dict(
+                    name=country,
+                    mapped=mapped,
+                    validated=validated,
+                    total=mapped + validated,
+                )
+            )
+            result.append(dto)
+
+        # Order by total
+        result = sorted(result, reverse=True, key=lambda i: i.total)
+        countries_dto = UserCountriesContributed()
+        countries_dto.countries_contributed = result
+        countries_dto.total = len(result)
+
+        return countries_dto
 
     @staticmethod
     def get_mapped_projects(user_name: str, preferred_locale: str):

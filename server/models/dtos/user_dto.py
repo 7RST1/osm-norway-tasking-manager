@@ -109,6 +109,28 @@ class UserOSMDTO(Model):
     changeset_count = IntType(required=True, serialized_name="changesetCount")
 
 
+class UserCountryContributed(Model):
+    """ DTO for country a user has contributed """
+
+    name = StringType(required=True)
+    mapped = IntType(required=True)
+    validated = IntType(required=True)
+    total = IntType(required=True)
+
+
+class UserCountriesContributed(Model):
+    """ DTO for countries a user has contributed """
+
+    def __init__(self):
+        super().__init__()
+        self.mapped_projects = []
+
+    countries_contributed = ListType(
+        ModelType(UserCountryContributed), serialized_name="userCountriesContributed"
+    )
+    total = IntType()
+
+
 class MappedProject(Model):
     """ Describes a single project a user has mapped """
 

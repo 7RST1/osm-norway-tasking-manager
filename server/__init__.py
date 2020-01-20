@@ -249,6 +249,7 @@ def add_api_endpoints(app):
         UserFavoritesAPI,
         UserRecommendedProjectsAPI,
         UserInterestsAPI,
+        UserCountriesMostContributedAPI,
     )
     from server.api.users.tasks import UsersTasksAPI
     from server.api.users.actions import (
@@ -721,6 +722,12 @@ def add_api_endpoints(app):
     api.add_resource(
         UserRecommendedProjectsAPI,
         format_url("users/<string:username>/recommended-projects/"),
+    )
+
+    # User countries most contributed endpoint
+    api.add_resource(
+        UserCountriesMostContributedAPI,
+        format_url("users/<string:username>/countries-most-contributed/"),
     )
 
     # User Interests endpoint
