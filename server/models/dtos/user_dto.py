@@ -1,13 +1,6 @@
 from schematics import Model
 from schematics.exceptions import ValidationError
-from schematics.types import (
-    StringType,
-    IntType,
-    EmailType,
-    LongType,
-    BooleanType,
-    DateTimeType,
-)
+from schematics.types import StringType, IntType, EmailType, LongType, BooleanType
 
 from schematics.types.compound import ListType, ModelType, BaseType
 from server.models.dtos.stats_dto import Pagination
