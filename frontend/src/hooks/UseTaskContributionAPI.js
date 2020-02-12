@@ -2,12 +2,7 @@ import { useSelector } from 'react-redux';
 import { useEffect, useReducer } from 'react';
 import axios from 'axios';
 
-import {
-  useQueryParams,
-  StringParam,
-  stringify as stringifyUQP,
-  BooleanParam,
-} from 'use-query-params';
+import { useQueryParams, StringParam, stringify as stringifyUQP } from 'use-query-params';
 import { CommaArrayParam } from '../utils/CommaArrayParam';
 import { useThrottle } from '../hooks/UseThrottle';
 import { remapParamsToAPI } from '../utils/remapParamsToAPI';
@@ -18,7 +13,7 @@ const contributionsQueryAllSpecification = {
   minDate: StringParam,
   text: StringParam,
   maxDate: StringParam,
-  archivedProjects: BooleanParam,
+  projectStatus: StringParam,
 };
 
 /* This can be passed into project API or used independently */
@@ -42,7 +37,7 @@ const backendToQueryConversion = {
   minDate: 'min_action_date',
   text: 'project_id',
   maxDate: 'max_action_date',
-  archivedProjects: 'archived_projects',
+  projectStatus: 'project_status',
 };
 
 const dataFetchReducer = (state, action) => {
@@ -65,17 +60,7 @@ const dataFetchReducer = (state, action) => {
         isLoading: false,
         isError: false,
         tasks: action.payload.tasks,
-        pagination: {
-          hasNext: false,
-          hasPrev: false,
-          nextNum: null,
-          page: 1,
-          pages: 1,
-          prevNum: null,
-          perPage: 100,
-          total: (action.payload.tasks && action.payload.tasks.length) || 0,
-        },
-        // pagination: action.payload.pagination,
+        pagination: action.payload.pagination,
       };
     case 'FETCH_FAILURE':
       return {

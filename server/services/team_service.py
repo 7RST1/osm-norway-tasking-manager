@@ -95,16 +95,16 @@ class TeamService:
         )
 
     @staticmethod
-    def accept_reject_join_request(team_id, from_user_id, username, function, response):
+    def accept_reject_join_request(team_id, from_user_id, username, function, action):
         from_user = UserService.get_user_by_id(from_user_id)
         to_user_id = UserService.get_user_by_username(username).id
         team = TeamService.get_team_by_id(team_id)
         MessageService.accept_reject_request_to_join_team(
-            from_user_id, from_user.username, to_user_id, team.name, response
+            from_user_id, from_user.username, to_user_id, team.name, action
         )
 
         is_member = TeamService.is_user_member_of_team(team_id, to_user_id)
-        if response == "accept":
+        if action == "accept":
             if is_member:
                 TeamService.activate_team_member(team_id, to_user_id)
             else:
@@ -114,15 +114,15 @@ class TeamService:
                     TeamMemberFunctions[function.upper()].value,
                     True,
                 )
-        elif response == "reject":
+        elif action == "reject":
             if is_member:
                 TeamService.delete_invite(team_id, to_user_id)
         else:
-            raise TeamServiceError("Invalid response type")
+            raise TeamServiceError("Invalid action type")
 
     @staticmethod
     def accept_reject_invitation_request(
-        team_id, from_user_id, username, function, response
+        team_id, from_user_id, username, function, action
     ):
         from_user = UserService.get_user_by_id(from_user_id)
         to_user = UserService.get_user_by_username(username)
@@ -136,9 +136,9 @@ class TeamService:
                 member.user_id,
                 to_user.username,
                 team.name,
-                response,
+                action,
             )
-        if response == "accept":
+        if action == "accept":
             TeamService.add_team_member(
                 team_id, from_user_id, TeamMemberFunctions[function.upper()].value
             )
@@ -161,12 +161,12 @@ class TeamService:
         team_member.delete()
 
     @staticmethod
-    def add_team_project(team_id, project_id):
-        project = ProjectTeams()
-        project.project_id = project_id
-        project.team_id = team_id
-        project.role = 1
-        project.create()
+    def add_team_project(team_id, project_id, role):
+        team_project = ProjectTeams()
+        team_project.project_id = project_id
+        team_project.team_id = team_id
+        team_project.role = TeamRoles[role].value
+        team_project.create()
 
     @staticmethod
     def delete_team_project(team_id, project_id):
@@ -326,7 +326,9 @@ class TeamService:
     @staticmethod
     def get_project_teams_as_dto(project_id: int) -> TeamsListDTO:
         """ Gets all the campaigns for a specified project """
-        project_teams = ProjectTeams.query.filter(project_id == project_id).all()
+        project_teams = ProjectTeams.query.filter(
+            ProjectTeams.project_id == project_id
+        ).all()
         teams_list_dto = TeamsListDTO()
 
         for project_team in project_teams:

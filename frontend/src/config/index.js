@@ -26,6 +26,10 @@ export const ORG_FB = process.env.REACT_APP_ORG_FB || 'https://www.facebook.com'
 export const ORG_INSTAGRAM = process.env.REACT_APP_ORG_INSTAGRAM || 'https://www.instagram.com';
 export const ORG_YOUTUBE = process.env.REACT_APP_ORG_YOUTUBE || 'https://www.youtube.com';
 export const ORG_GITHUB = process.env.REACT_APP_ORG_GITHUB || 'https://github.com/';
+export const OSM_STATS_URL =
+  process.env.REACT_APP_OSM_STATS_URL || 'https://osm-stats-prod-api.azurewebsites.net/';
+
+export const MAX_FILESIZE = parseInt(process.env.REACT_APP_MAX_FILESIZE) || 5000000; // bytes
 
 export const TASK_COLOURS = {
   READY: '#fff',
@@ -35,7 +39,7 @@ export const TASK_COLOURS = {
   VALIDATED: '#40ac8c',
   INVALIDATED: '#fceca4',
   BADIMAGERY: '#d8dae4',
-  PRIORITY_AREA: '#ffc5c8',
+  PRIORITY_AREAS: '#efd1d1',
 };
 
 const fallbackRasterStyle = {

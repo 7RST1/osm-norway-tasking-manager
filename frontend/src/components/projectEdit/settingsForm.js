@@ -1,5 +1,8 @@
 import React, { useContext } from 'react';
+import { FormattedMessage } from 'react-intl';
 
+import messages from './messages';
+import { SwitchToggle } from '../formInputs';
 import { getEditors } from '../../utils/editorsList';
 import { StateContext, styleClasses, handleCheckButton } from '../../views/projectEdit';
 
@@ -26,7 +29,9 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
   return (
     <div className="w-100">
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Default Language</label>
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.language} />
+        </label>
         <select name="defaultLocale" onChange={updateDefaultLocale} className="pa2">
           {languages.map(l => (
             <option selected={l.code === defaultLocale ? true : false} value={l.code}>
@@ -36,7 +41,9 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
         </select>
       </div>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Editors for mapping</label>
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.mappingEditors} />
+        </label>
         {editors.map(elm => (
           <label className="db pv2">
             <input
@@ -50,9 +57,24 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
             {elm.label}
           </label>
         ))}
+        {projectInfo.hasOwnProperty('customEditor') && (
+          <label className="db pv2">
+            <input
+              className="mr2"
+              name="mapping_editors"
+              onChange={handleMappingEditors}
+              checked={projectInfo.mappingEditors.includes('CUSTOM')}
+              type="checkbox"
+              value={'CUSTOM'}
+            />
+            <FormattedMessage {...messages.customEditor} />
+          </label>
+        )}
       </div>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Editors for validation</label>
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.validationEditors} />
+        </label>
         {editors.map(elm => (
           <label className="db pv2">
             <input
@@ -66,27 +88,37 @@ export const SettingsForm = ({ languages, defaultLocale }) => {
             {elm.label}
           </label>
         ))}
+        {projectInfo.hasOwnProperty('customEditor') && (
+          <label className="db pv2">
+            <input
+              className="mr2"
+              name="validation_editors"
+              onChange={handleValidationEditors}
+              checked={projectInfo.validationEditors.includes('CUSTOM')}
+              type="checkbox"
+              value={'CUSTOM'}
+            />
+            <FormattedMessage {...messages.customEditor} />
+          </label>
+        )}
       </div>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Enforce Random Task Selection</label>
-        <label className={styleClasses.pClass}>
-          <input
-            className="mr2"
-            onChange={() =>
-              setProjectInfo({
-                ...projectInfo,
-                enforceRandomTaskSelection: !projectInfo.enforceRandomTaskSelection,
-              })
-            }
-            type="checkbox"
-            value={projectInfo.enforceRandomTaskSelection}
-            name="enforceRandomTaskSelection"
-          />
-          Enforce random task selection on mapping
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.randomTaskSelection} />
         </label>
+        <SwitchToggle
+          label={<FormattedMessage {...messages.randomTaskSelectionMapping} />}
+          labelPosition="right"
+          isChecked={projectInfo.enforceRandomTaskSelection}
+          onChange={() =>
+            setProjectInfo({
+              ...projectInfo,
+              enforceRandomTaskSelection: !projectInfo.enforceRandomTaskSelection,
+            })
+          }
+        />
         <p className={styleClasses.pClass}>
-          If checked, users must edit tasks at random for the initial editing stage (project
-          managers and admins are exempt).
+          <FormattedMessage {...messages.randomTaskSelectionDescription} />
         </p>
       </div>
     </div>

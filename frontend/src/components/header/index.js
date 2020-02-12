@@ -18,21 +18,27 @@ import { UpdateEmail } from './updateEmail';
 import { CurrentUserAvatar } from '../user/avatar';
 import { logout } from '../../store/actions/auth';
 import { createLoginWindow } from '../../utils/login';
+import { isUserAdminOrPM } from '../../utils/userPermissions';
 import { NotificationBell } from './notificationBell';
 import { useDebouncedCallback } from '../../hooks/UseThrottle';
 
 function getMenuItensForUser(userDetails) {
   const menuItems = [
     { label: messages.exploreProjects, link: 'explore', showAlways: true },
-    { label: messages.myContributions, link: 'user', authenticated: true },
+    {
+      label: messages.myContributions,
+      link: `contributions`,
+      authenticated: true,
+    },
     { label: messages.manage, link: 'manage', authenticated: true, manager: true },
-    { label: messages.learn, link: 'learn', showAlways: true },
-    { label: messages.about, link: 'about', showAlways: true },
+    // disable learn and about while the content is rewritten
+    // { label: messages.learn, link: 'learn', showAlways: true },
+    // { label: messages.about, link: 'about', showAlways: true },
   ];
   let filteredMenuItems;
   if (userDetails.username) {
     filteredMenuItems = menuItems.filter(item => item.authenticated === true || item.showAlways);
-    if (!['PROJECT_MANAGER', 'ADMIN'].includes(userDetails.role)) {
+    if (!isUserAdminOrPM(userDetails.role)) {
       filteredMenuItems = filteredMenuItems.filter(item => !item.manager);
     }
   } else {

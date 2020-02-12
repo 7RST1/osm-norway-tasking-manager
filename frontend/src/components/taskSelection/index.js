@@ -14,6 +14,7 @@ import { TaskList } from './taskList';
 import { TasksMapLegend } from './legend';
 import { ProjectInstructions } from './instructions';
 import { ProjectHeader } from '../projectDetail/header';
+import Contributions from './contributions';
 
 const TaskSelectionFooter = React.lazy(() => import('./footer'));
 
@@ -60,12 +61,39 @@ export function TaskSelection({ project, type, loading }: Object) {
     `projects/${project.projectId}/activities/latest/`,
     60000,
   );
+  /* eslint-disable-next-line */
+  const [userTeamsError, userTeamsLoading, userTeams] = useFetch(
+    `teams/?member=${user.id}`,
+    user.id,
+  );
+
+  /* eslint-disable-next-line */
+  const [contributionsError, contributionsLoading, contributions] = useFetch(
+    `projects/${project.projectId}/contributions/`,
+    project.projectId !== undefined,
+  );
+  const [priorityAreasError, priorityAreasLoading, priorityAreas] = useFetch(
+    `projects/${project.projectId}/queries/priority-areas/`,
+    project.projectId !== undefined,
+  );
 
   // if the user is a beginner, open the page with the instructions tab activated
   useEffect(() => {
-    setActiveSection(user.mappingLevel === 'BEGINNER' ? 'instructions' : 'tasks');
     setTasks(initialTasks);
-  }, [user.mappingLevel, initialTasks]);
+  }, [initialTasks]);
+
+  useEffect(() => {
+    if (contributions && contributions.userContributions) {
+      const currentUserContributions = contributions.userContributions.filter(
+        u => u.username === user.username,
+      );
+      if (currentUserContributions.length > 0) {
+        setActiveSection('tasks');
+      } else {
+        setActiveSection('instructions');
+      }
+    }
+  }, [contributions, user.username]);
 
   useEffect(() => {
     // run it only when the component is initialized
@@ -87,11 +115,20 @@ export function TaskSelection({ project, type, loading }: Object) {
         dispatch({ type: 'SET_TASKS_STATUS', status: lockedByCurrentUser[0].taskStatus });
       } else {
         // otherwise we check if the user can map or validate the project
-        setTaskAction(getTaskAction(user, project, null));
+        setTaskAction(getTaskAction(user, project, null, userTeams.teams));
       }
       setMapInit(true);
     }
-  }, [lockedTasks, dispatch, initialActivities, user.username, mapInit, project, user]);
+  }, [
+    lockedTasks,
+    dispatch,
+    initialActivities,
+    user.username,
+    mapInit,
+    project,
+    user,
+    userTeams.teams,
+  ]);
 
   // refresh the task status on the map each time the activities are updated
   useEffect(() => {
@@ -114,11 +151,12 @@ export function TaskSelection({ project, type, loading }: Object) {
     // if selection is an array, just update the state
     if (typeof selection === 'object') {
       setSelectedTasks(selection);
+      setTaskAction(getTaskAction(user, project, status));
     } else {
       // unselecting tasks
       if (selected.includes(selection)) {
         setSelectedTasks([]);
-        setTaskAction(getTaskAction(user, project, null));
+        setTaskAction(getTaskAction(user, project, null, userTeams.teams));
       } else {
         setSelectedTasks([selection]);
         if (lockedTasks.get('tasks').includes(selection)) {
@@ -128,7 +166,7 @@ export function TaskSelection({ project, type, loading }: Object) {
               : 'resumeValidation',
           );
         } else {
-          setTaskAction(getTaskAction(user, project, status));
+          setTaskAction(getTaskAction(user, project, status, userTeams.teams));
         }
       }
     }
@@ -138,7 +176,7 @@ export function TaskSelection({ project, type, loading }: Object) {
     <div>
       <div className="cf vh-minus-200-ns">
         <div className="w-100 w-50-ns fl pt3 overflow-y-scroll-ns vh-minus-200-ns h-100">
-          <div className="pl4-ns pl2 pr2">
+          <div className="pl4-l pl2 pr2">
             <ReactPlaceholder
               showLoadingAnimation={true}
               rows={3}
@@ -160,6 +198,13 @@ export function TaskSelection({ project, type, loading }: Object) {
                   >
                     <FormattedMessage {...messages.instructions} />
                   </span>
+                  <span
+                    className={`mr4 pb2 pointer ${activeSection === 'contributions' &&
+                      'bb b--blue-dark'}`}
+                    onClick={() => setActiveSection('contributions')}
+                  >
+                    <FormattedMessage {...messages.contributions} />
+                  </span>
                 </div>
                 <div className="pt3">
                   {activeSection === 'tasks' ? (
@@ -169,11 +214,19 @@ export function TaskSelection({ project, type, loading }: Object) {
                       selectTask={selectTask}
                       selected={selected}
                     />
-                  ) : (
+                  ) : null}
+                  {activeSection === 'instructions' ? (
                     <ProjectInstructions
                       instructions={project.projectInfo && project.projectInfo.instructions}
                     />
-                  )}
+                  ) : null}
+                  {activeSection === 'contributions' ? (
+                    <Contributions
+                      selectTask={selectTask}
+                      tasks={tasks}
+                      contribsData={contributions}
+                    />
+                  ) : null}
                 </div>
               </div>
             </ReactPlaceholder>
@@ -196,6 +249,7 @@ export function TaskSelection({ project, type, loading }: Object) {
               selectTask={selectTask}
               selected={selected}
               taskBordersOnly={false}
+              priorityAreas={!priorityAreasError && !priorityAreasLoading && priorityAreas}
               animateZoom={false}
             />
             <TasksMapLegend />

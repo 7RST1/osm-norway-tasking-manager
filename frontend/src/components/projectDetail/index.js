@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import ReactPlaceholder from 'react-placeholder';
+import { centroid } from '@turf/turf';
 import { useMeta, useTitle } from 'react-meta-elements';
 
 import messages from './messages';
@@ -9,11 +10,13 @@ import ProjectProgressBar from '../projectcard/projectProgressBar';
 import DueDateBox from '../projectcard/dueDateBox';
 
 import { MappingLevelMessage } from '../mappingLevel';
+import { UserAvatar } from '../user/avatar';
 
 import { TasksMap } from '../taskSelection/map.js';
 import { ProjectHeader } from './header';
 import { MappingTypes } from '../mappingTypes';
 import { Imagery } from '../taskSelection/imagery';
+import { TeamsBoxList } from '../teamsAndOrgs/teams';
 
 import { htmlFromMarkdown } from '../../utils/htmlFromMarkdown';
 import { NewMapperFlow } from './newMapperFlow';
@@ -60,15 +63,9 @@ const ProjectDetailMap = props => {
       },
     ],
   };
-  var centroidGeoJSON = props.totalMappers.aoiCentroid && {
+  var centroidGeoJSON = props.project.areaOfInterest && {
     type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {},
-        geometry: props.totalMappers.aoiCentroid,
-      },
-    ],
+    features: [centroid(props.project.areaOfInterest)],
   };
   return (
     <div className="relative">
@@ -79,6 +76,7 @@ const ProjectDetailMap = props => {
       }
       <TasksMap
         mapResults={props.tasks}
+        priorityAreas={props.project.priorityAreas}
         taskBordersMap={taskBordersGeoJSON}
         taskCentroidMap={centroidGeoJSON}
         taskBordersOnly={taskBordersOnly}
@@ -86,7 +84,7 @@ const ProjectDetailMap = props => {
         navigate={props.navigate}
         type={props.type}
         error={props.tasksError}
-        loading={props.tasksLoading}
+        loading={props.projectLoading}
         className="dib w-100 fl vh-75"
       />
       {taskBordersOnly && (
@@ -103,6 +101,8 @@ const ProjectDetailMap = props => {
 };
 
 export const ProjectDetailLeft = props => {
+  const [isShowing, setShowing] = useState(false);
+
   const htmlDescription =
     props.project.projectInfo && htmlFromMarkdown(props.project.projectInfo.description);
   const htmlShortDescription =
@@ -121,7 +121,7 @@ export const ProjectDetailLeft = props => {
   // useMeta({name: 'og:description', content: `#${props.project.projectId || "Tasking Manager"}: ${props.project.projectInfo && props.project.projectInfo.name}` });
   return (
     <div className={`${props.className}`}>
-      <div className="h-75">
+      <div className="h-75 z-1">
         <ReactPlaceholder
           showLoadingAnimation={true}
           rows={3}
@@ -129,56 +129,76 @@ export const ProjectDetailLeft = props => {
           ready={typeof props.project.projectId === 'number'}
         >
           <ProjectHeader project={props.project} />
-          <section className={`lh-copy h5 overflow-x-scroll`}>
+          <section className={`lh-copy h-100 overflow-x-scroll`}>
             <div className="pr2" dangerouslySetInnerHTML={htmlShortDescription} />
             <div className="pv2">
-              <ShowReadMoreButton>
+              <ShowReadMoreButton isShowing={isShowing} setShowing={setShowing}>
                 <div className="pv2 pr2" dangerouslySetInnerHTML={htmlDescription} />
               </ShowReadMoreButton>
             </div>
-            <img className="h4 pa1" src={props.project.organisationLogo} alt="" />
+            <div className="cf w-100">
+              {props.project.organisationName && (
+                <>
+                  <p>
+                    <FormattedMessage
+                      {...messages.projectCoordination}
+                      values={{
+                        organisation: <span className="fw6">{props.project.organisationName}</span>,
+                      }}
+                    />
+                  </p>
+                  <img
+                    className="w4 pa1 z-1"
+                    src={props.project.organisationLogo}
+                    alt={props.project.organisationName}
+                  />
+                </>
+              )}
+            </div>
           </section>
         </ReactPlaceholder>
       </div>
 
-      <div className="cf pr4 pb3 pt0">
-        <ReactPlaceholder
-          showLoadingAnimation={true}
-          rows={3}
-          delay={500}
-          ready={typeof props.project.projectId === 'number'}
-        >
-          <ProjectDetailTypeBar
-            type={props.type}
-            mappingTypes={props.project.mappingTypes || []}
-            imagery={props.project.imagery}
-            editors={props.project.mappingEditors}
-            defaultUserEditor={props.userPreferences.default_editor}
-          />
-          <ReactPlaceholder rows={1} ready={typeof props.totalMappers.totalMappers === 'number'}>
-            <BigProjectTeaser
-              className="pt3"
-              totalContributors={props.totalMappers.totalMappers || 0}
-              lastUpdated={props.project.lastUpdated}
-              littleFont="f5"
-              bigFont="f4"
+      {!isShowing && (
+        <div className="cf ph4 pb3 w-100 h-25 z-2 absolute bottom-0 left-0 bg-white">
+          <ReactPlaceholder
+            showLoadingAnimation={true}
+            rows={3}
+            delay={500}
+            ready={typeof props.project.projectId === 'number'}
+          >
+            <ProjectDetailTypeBar
+              type={props.type}
+              mappingTypes={props.project.mappingTypes || []}
+              imagery={props.project.imagery}
+              editors={props.project.mappingEditors}
+              defaultUserEditor={props.userPreferences.default_editor}
             />
+            <ReactPlaceholder rows={1} ready={typeof props.contributors.length === 'number'}>
+              <BigProjectTeaser
+                className="pt3"
+                totalContributors={props.contributors.length}
+                lastUpdated={props.project.lastUpdated}
+                littleFont="f5"
+                bigFont="f4"
+              />
+            </ReactPlaceholder>
+            <ProjectProgressBar
+              className="pb2"
+              percentMapped={props.project.percentMapped}
+              percentValidated={props.project.percentValidated}
+            />
+            <div className="cf pb1 h2">
+              <MappingLevelMessage
+                level={props.project.mapperLevel}
+                className="tl f5 mt1 ttc fw5 blue-dark"
+              />
+              <DueDateBox dueDate={props.project.dueDate} />
+            </div>
+            <DueDateBox />
           </ReactPlaceholder>
-          <ProjectProgressBar
-            className="pb2"
-            percentMapped={props.project.percentMapped || 50}
-            percentValidated={props.project.percentValidated || 25}
-          />
-          <div className="cf pt1 h2">
-            <MappingLevelMessage
-              level={props.project.mapperLevel}
-              className="fl f5 mt1 ttc fw5 blue-dark"
-            />
-            <DueDateBox dueDate={props.project.dueDate} />
-          </div>
-          <DueDateBox />
-        </ReactPlaceholder>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -186,11 +206,14 @@ export const ProjectDetailLeft = props => {
 export const ProjectDetail = props => {
   const h2Classes = 'pl4 f2 fw6 mt2 mb3 ttu barlow-condensed blue-dark';
   return (
-    <div className={`${props.className || ''}`}>
+    <div className={`${props.className || 'bg-white blue-dark'}`}>
       <div className="bb b--grey-light">
         <div className="cf">
-          <ProjectDetailLeft {...props} className={`w-100 w-60-l fl ph4 pv3 vh-75-l vh-110`} />
-          <div className="w-100 w-40-l fl">
+          <ProjectDetailLeft
+            {...props}
+            className="w-100 w-60-l fl ph4 pv3 bg-white blue-dark vh-minus-200-ns relative"
+          />
+          <div className="w-100 w-40-l vh-minus-200-ns fl">
             <ReactPlaceholder
               showLoadingAnimation={true}
               type={'media'}
@@ -221,12 +244,38 @@ export const ProjectDetail = props => {
       </h3>
       <QuestionsAndComments projectId={props.project.projectId} />
 
+      <a href="#teams" style={{ visibility: 'hidden' }} name="teams">
+        <FormattedMessage {...messages.teams} />
+      </a>
+      <h3 className={`${h2Classes}`}>
+        <FormattedMessage {...messages.teams} />
+      </h3>
+      <div className="ph4 mb3 cf db">
+        {props.project.teams && props.project.teams.length ? (
+          <TeamsBoxList teams={props.project.teams} />
+        ) : (
+          <FormattedMessage {...messages.noProjectTeams} />
+        )}
+      </div>
+
       <a href="#contributions" name="contributions" style={{ visibility: 'hidden' }}>
         <FormattedMessage {...messages.contributors} />
       </a>
-      <h3 className={`${h2Classes} mb6 `}>
+      <h3 className={`${h2Classes}`}>
         <FormattedMessage {...messages.contributors} />
       </h3>
+      <div className="cf db mb3 ph4">
+        {props.contributors &&
+          props.contributors.map((user, n) => (
+            <UserAvatar
+              username={user.username}
+              picture={user.pictureUrl}
+              size="large"
+              colorClasses="white bg-blue-grey"
+              key={n}
+            />
+          ))}
+      </div>
 
       <a href="#contributionTimeline" style={{ visibility: 'hidden' }} name="contributionTimeline">
         <FormattedMessage {...messages.contributionsTimeline} />
@@ -234,7 +283,7 @@ export const ProjectDetail = props => {
       <h3 className={`${h2Classes}`}>
         <FormattedMessage {...messages.contributionsTimeline} />
       </h3>
-      <div className={``}>
+      <div>
         <React.Suspense fallback={<div className={`w7 h5`}>Loading...</div>}>
           <ReactPlaceholder
             showLoadingAnimation={true}

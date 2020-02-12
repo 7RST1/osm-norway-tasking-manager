@@ -67,7 +67,7 @@ export function CreateCampaign() {
       render={({ handleSubmit, pristine, form, submitting, values }) => {
         return (
           <form onSubmit={handleSubmit} className="blue-grey">
-            <div className="cf pa4 bg-tan vh-100">
+            <div className="cf vh-100">
               <h3 className="f2 mb3 ttu blue-dark fw7 barlow-condensed">
                 <FormattedMessage {...messages.newCampaign} />
               </h3>
@@ -120,7 +120,7 @@ export function EditCampaign(props) {
   };
 
   return (
-    <div className="cf pa4 bg-tan">
+    <div className="cf pv4 bg-tan">
       <div className="cf">
         <h3 className="f2 ttu blue-dark fw7 barlow-condensed v-mid ma0 dib ttu">
           <FormattedMessage {...messages.manageCampaign} />

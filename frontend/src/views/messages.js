@@ -1,7 +1,7 @@
 import { defineMessages } from 'react-intl';
 
 /**
- * Internationalized messages for use on header.
+ * Internationalized messages for use on views.
  */
 export default defineMessages({
   pageNotFound: {
@@ -51,6 +51,10 @@ export default defineMessages({
   joinTeam: {
     id: 'teamsAndOrgs.management.button.join_team',
     defaultMessage: 'Join team',
+  },
+  cancelRequest: {
+    id: 'teamsAndOrgs.management.button.cancel_request',
+    defaultMessage: 'Cancel request',
   },
   leaveTeam: {
     id: 'teamsAndOrgs.management.button.leave_team',
@@ -168,12 +172,12 @@ export default defineMessages({
   howItWorksPart1: {
     id: 'pages.about.howItWorks.description.part_1',
     defaultMessage:
-      'The Tasking Manager allows to divide up a mapping project into smaller tasks that can be completed rapidly with many people working on the same overall area. It shows which areas need to be mapped and which areas need to be reviewed for quality assurance.',
+      'A mapping area in OpenStreetMap is divided up into small, individual tasks for volunteer to complete. A simple legend allows users to see which areas still need to be mapped and which areas map data needs to be reviewed for quality assurance.',
   },
   howItWorksPart2: {
     id: 'pages.about.howItWorks.description.part_2',
     defaultMessage:
-      'This approach allows the distribution of tasks to many individual mappers in the context of emergency or other humanitarian mapping scenario. It also allows monitoring the overall project progress and helps improve the consistency of the mapping (e.g., elements to cover, specific tags to use, etc.).',
+      'With Tasking Manager, volunteers can easily see where other mappers are actively mapping, allowing many individuals to map an area together in a coordinated way. This system helps to improve the consistency and quality of mapping.',
   },
   floss: {
     id: 'pages.about.floss.title',
@@ -191,5 +195,57 @@ export default defineMessages({
   appCode: {
     id: 'pages.about.floss.application_code',
     defaultMessage: 'application code',
+  },
+  editProject: {
+    id: 'pages.edit_project.title',
+    defaultMessage: 'Edit project',
+  },
+  save: {
+    id: 'pages.edit_project.buttons.save',
+    defaultMessage: 'Save',
+  },
+  goToProjectPage: {
+    id: 'pages.edit_project.buttons.go_to_project',
+    defaultMessage: 'Go to project page',
+  },
+  updateSuccess: {
+    id: 'pages.edit_project.actions.update.success',
+    defaultMessage: 'Project updated successfully.',
+  },
+  updateError: {
+    id: 'pages.edit_project.actions.update.error',
+    defaultMessage: 'Project update failed: {error}',
+  },
+  projectEditSection_description: {
+    id: 'pages.edit_project.sections.description',
+    defaultMessage: 'Descrition',
+  },
+  projectEditSection_instructions: {
+    id: 'pages.edit_project.sections.instructions',
+    defaultMessage: 'Instructions',
+  },
+  projectEditSection_metadata: {
+    id: 'pages.edit_project.sections.metadata',
+    defaultMessage: 'Metadata',
+  },
+  projectEditSection_priority_areas: {
+    id: 'pages.edit_project.sections.priority_areas',
+    defaultMessage: 'Priority areas',
+  },
+  projectEditSection_imagery: {
+    id: 'pages.edit_project.sections.imagery',
+    defaultMessage: 'Imagery',
+  },
+  projectEditSection_permissions: {
+    id: 'pages.edit_project.sections.permissions',
+    defaultMessage: 'Permissions',
+  },
+  projectEditSection_settings: {
+    id: 'pages.edit_project.sections.settings',
+    defaultMessage: 'Settings',
+  },
+  projectEditSection_actions: {
+    id: 'pages.edit_project.sections.actions',
+    defaultMessage: 'Actions',
   },
 });

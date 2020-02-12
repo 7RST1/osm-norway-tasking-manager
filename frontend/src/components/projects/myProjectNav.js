@@ -9,20 +9,13 @@ import { useExploreProjectsQueryParams, stringify } from '../../hooks/UseProject
 import { ProjectSearchBox } from './projectSearchBox';
 import { OrderBySelector } from './orderBy';
 import { ShowMapToggle } from './projectNav';
+import { isUserAdminOrPM } from '../../utils/userPermissions';
 
 const isActiveButton = (buttonName, projectQuery) => {
-  const allBoolean =
-    projectQuery.createdByMe &&
-    projectQuery.mappedByMe &&
-    projectQuery.favoritedByMe &&
-    projectQuery.createdByMeArchived;
-  if (
-    Boolean(projectQuery[buttonName] === true) ^ Boolean(allBoolean) ||
-    (buttonName === 'All' && allBoolean)
-  ) {
-    return 'bg-blue-grey white';
+  if (JSON.stringify(projectQuery).indexOf(buttonName) !== -1) {
+    return 'bg-blue-grey white fw5';
   } else {
-    return 'bg-white grey-light';
+    return 'bg-white blue-grey';
   }
 };
 
@@ -39,11 +32,11 @@ export const MyProjectNav = props => {
     <header className="bt bb b--tan">
       <div className="cf">
         <div className="w-75-l w-60 fl">
-          <h3 className="barlow-condensed f2 ma0 pv3 v-mid dib ttu pl2 pl0-l">
+          <h3 className="barlow-condensed f2 ma0 pv3 mt1 v-mid dib ttu pl2 pl0-l">
             <FormattedMessage {...messages.myProjects} />
           </h3>
-          {userDetails && ['ADMIN', 'PROJECT_MANAGER'].includes(userDetails.role) && (
-            <Link to={'new/'} className="dib ml3">
+          {userDetails && isUserAdminOrPM(userDetails.role) && (
+            <Link to={'/manage/projects/new/'} className="dib ml3">
               <AddButton />
             </Link>
           )}
@@ -56,7 +49,7 @@ export const MyProjectNav = props => {
               className="dib fl mh1 w-40"
               setQuery={setQuery}
               fullProjectsQuery={fullProjectsQuery}
-              placeholder="Search (localize)"
+              placeholder="Search project"
             />
             <OrderBySelector
               className={`fl mt1 mt2-ns`}
@@ -77,41 +70,39 @@ export const MyProjectNav = props => {
       </div>
       <div className="mt2 mb3">
         <Link
-          to="/projects/?favoritedByMe=1&mappedByMe=1&createdByMe=1&createdByMeArchived=1"
-          className={`di mh1 ${isActiveButton('All', fullProjectsQuery)} strike ${linkCombo}`}
-        >
-          <FormattedMessage {...messages.allprojects} />
-        </Link>
-        <Link
-          to="/projects/?favoritedByMe=1"
-          className={`di mh1 ${isActiveButton(
-            'favoritedByMe',
-            fullProjectsQuery,
-          )} ${linkCombo}`}
-        >
-          <FormattedMessage {...messages.favorite} />
-        </Link>
-        <Link
-          to={`/projects/?mappedByMe=1`}
+          to={`./?mappedByMe=1`}
           className={`di mh1 ${isActiveButton('mappedByMe', fullProjectsQuery)} ${linkCombo}`}
         >
           <FormattedMessage {...messages.contributed} />
         </Link>
         <Link
-          to={`/projects/?createdByMe=1`}
-          className={`di mh1 ${isActiveButton('createdByMe', fullProjectsQuery)} ${linkCombo}`}
+          to="./?favoritedByMe=1"
+          className={`di mh1 ${isActiveButton('favoritedByMe', fullProjectsQuery)} ${linkCombo}`}
         >
-          <FormattedMessage {...messages.created} />
+          <FormattedMessage {...messages.favorited} />
         </Link>
-        <Link
-          to={`/projects/?createdByMeArchived=1`}
-          className={`di mh1 ${isActiveButton(
-            'createdByMeArchived',
-            fullProjectsQuery,
-          )} strike ${linkCombo}`}
-        >
-          <FormattedMessage {...messages.archived} />
-        </Link>
+        {userDetails && isUserAdminOrPM(userDetails.role) && (
+          <>
+            <Link
+              to={`./?createdByMe=1`}
+              className={`di mh1 ${isActiveButton('createdByMe', fullProjectsQuery)} ${linkCombo}`}
+            >
+              <FormattedMessage {...messages.created} />
+            </Link>
+            <Link
+              to={`./?status=DRAFT`}
+              className={`di mh1 ${isActiveButton('DRAFT', fullProjectsQuery)} ${linkCombo}`}
+            >
+              <FormattedMessage {...messages.draft} />
+            </Link>
+            <Link
+              to={`./?status=ARCHIVED`}
+              className={`di mh1 ${isActiveButton('ARCHIVED', fullProjectsQuery)} ${linkCombo}`}
+            >
+              <FormattedMessage {...messages.archived} />
+            </Link>
+          </>
+        )}
       </div>
       {props.children}
     </header>

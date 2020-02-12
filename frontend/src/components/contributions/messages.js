@@ -4,9 +4,9 @@ import { defineMessages } from 'react-intl';
  * Internationalized messages for use on homepage.
  */
 export default defineMessages({
-  myContributions: {
+  myTasks: {
     id: 'mytasks.mainSection.title',
-    defaultMessage: 'My Contributions',
+    defaultMessage: 'My Tasks',
   },
   contribution: {
     id: 'mytasks.contribution',
@@ -16,9 +16,21 @@ export default defineMessages({
     id: 'mytasks.filter.all',
     defaultMessage: 'All',
   },
+  mapped: {
+    id: 'mytasks.filter.mapped',
+    defaultMessage: 'Mapped',
+  },
+  validated: {
+    id: 'mytasks.filter.validated',
+    defaultMessage: 'Validated',
+  },
+  invalidated: {
+    id: 'mytasks.filter.invalidated',
+    defaultMessage: 'More mapping needed',
+  },
   archived: {
     id: 'mytasks.filter.archived',
-    defaultMessage: 'Archived',
+    defaultMessage: 'Archived projects',
   },
   projects: {
     id: 'mytasks.filter.projects',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, redirectTo } from '@reach/router';
 import ReactPlaceholder from 'react-placeholder';
-import { TextBlock, RectShape } from 'react-placeholder/lib/placeholders';
+import { RectShape } from 'react-placeholder/lib/placeholders';
 import { FormattedMessage } from 'react-intl';
 import { Form } from 'react-final-form';
 
@@ -34,11 +34,8 @@ export function ListOrganisations() {
 
   const placeHolder = (
     <div className="pb4 bg-tan">
-      <div className="w-50-ns w-100 cf ph6-l ph4">
-        <TextBlock rows={1} className="bg-grey-light h3" />
-      </div>
-      <RectShape className="bg-white dib mv2 mh6" style={{ width: 700, height: 250 }} />
-      <RectShape className="bg-white dib mv2 mh6" style={{ width: 700, height: 250 }} />
+      <RectShape className="bg-white dib mv2" style={{ width: 700, height: 250 }} />
+      <RectShape className="bg-white dib mv2" style={{ width: 700, height: 250 }} />
     </div>
   );
 
@@ -94,7 +91,7 @@ export function CreateOrganisation() {
       render={({ handleSubmit, pristine, form, submitting, values }) => {
         return (
           <form onSubmit={handleSubmit} className="blue-grey">
-            <div className="cf pa4 pb5 bg-tan">
+            <div className="cf pb5">
               <h3 className="f2 mb3 ttu blue-dark fw7 barlow-condensed">
                 <FormattedMessage {...messages.newOrganisation} />
               </h3>
@@ -108,7 +105,7 @@ export function CreateOrganisation() {
                 />
               </div>
             </div>
-            <div className="bottom-0 cf bg-white h3 w-100" style={{ position: 'sticky' }}>
+            <div className="bottom-0 right-0 left-0 cf bg-white h3 fixed">
               <div className="w-80-ns w-60-m w-50 h-100 fl tr">
                 <Link to={'../'}>
                   <CustomButton className="bg-white mr5 pr2 h-100 bn bg-white blue-dark">
@@ -170,8 +167,8 @@ export function EditOrganisation(props) {
   };
 
   return (
-    <div className="cf pa4 bg-tan">
-      <div className="cf">
+    <div className="cf">
+      <div className="cf pv4">
         <h3 className="f2 ttu blue-dark fw7 barlow-condensed v-mid ma0 dib">
           <FormattedMessage {...messages.manageOrganisation} />
         </h3>

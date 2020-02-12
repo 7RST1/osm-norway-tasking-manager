@@ -69,11 +69,13 @@ const TaskSelectionFooter = props => {
         })
         .catch(e => lockFailed());
     }
-    if (props.taskAction === 'resumeMapping') {
-      navigate(`/projects/${props.project.projectId}/map/`);
-    }
-    if (props.taskAction === 'resumeValidation') {
-      navigate(`/projects/${props.project.projectId}/validate/`);
+    if (['resumeMapping', 'resumeValidation'].includes(props.taskAction)) {
+      openEditor(editor, props.project, props.tasks, props.selectedTasks, [
+        window.innerWidth,
+        window.innerHeight,
+      ]);
+      const endpoint = props.taskAction === 'resumeMapping' ? 'map' : 'validate';
+      navigate(`/projects/${props.project.projectId}/${endpoint}/`);
     }
     // if user can not map or validate the project, lead him to the explore projects page
     if (
@@ -91,11 +93,16 @@ const TaskSelectionFooter = props => {
       props.project.mappingEditors &&
       props.taskAction.startsWith('validate')
     ) {
-      setEditorOptions(getEditors().filter(i => props.project.validationEditors.includes(i.value)));
+      setEditorOptions(getEditors(props.project.validationEditors, props.project.customEditor));
     } else {
-      setEditorOptions(getEditors().filter(i => props.project.mappingEditors.includes(i.value)));
+      setEditorOptions(getEditors(props.project.mappingEditors, props.project.customEditor));
     }
-  }, [props.taskAction, props.project.mappingEditors, props.project.validationEditors]);
+  }, [
+    props.taskAction,
+    props.project.mappingEditors,
+    props.project.validationEditors,
+    props.project.customEditor,
+  ]);
 
   const updateEditor = arr => setEditor(arr[0].value);
   const titleClasses = 'db ttu f6 blue-light mb2';

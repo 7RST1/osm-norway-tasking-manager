@@ -1,7 +1,7 @@
 from cachetools import TTLCache, cached
 from flask import current_app
 import datetime
-from sqlalchemy import text, func, or_, desc, and_
+from sqlalchemy import text, func, or_, desc, and_, distinct
 from server import db
 from server.models.dtos.project_dto import ProjectFavoritesDTO
 from server.models.dtos.user_dto import (
@@ -12,23 +12,26 @@ from server.models.dtos.user_dto import (
     UserSearchDTO,
     UserStatsDTO,
     UserContributionDTO,
-    UserContributionsDTO,
     RecommendedProject,
     UserRecommendedProjectsDTO,
     UserRegisterEmailDTO,
+    UserCountryContributed,
+    UserCountriesContributed,
 )
-from server.models.dtos.interests_dto import InterestsDTO
-from server.models.postgis.interests import Interest
+from server.models.dtos.interests_dto import InterestsDTO, InterestDTO
+from server.models.postgis.interests import Interest, projects_interests
 from server.models.postgis.message import Message
 from server.models.postgis.project import Project, ProjectInfo
 from server.models.postgis.user import User, UserRole, MappingLevel, UserEmail
 from server.models.postgis.task import TaskHistory, TaskAction, Task
-from server.models.dtos.mapping_dto import TaskDTOs
-from server.models.postgis.statuses import TaskStatus
+from server.models.dtos.user_dto import UserTaskDTOs
+from server.models.dtos.stats_dto import Pagination
+from server.models.postgis.statuses import TaskStatus, ProjectStatus
 from server.models.postgis.utils import NotFound
 from server.services.users.osm_service import OSMService, OSMServiceError
 from server.services.messaging.smtp_service import SMTPService
 from server.services.messaging.template_service import get_template
+
 
 user_filter_cache = TTLCache(maxsize=1024, ttl=600)
 user_all_cache = TTLCache(maxsize=1024, ttl=600)
@@ -62,22 +65,15 @@ class UserService:
         return user
 
     @staticmethod
-    def get_contributions_by_day(user_id: int) -> UserContributionsDTO:
+    def get_contributions_by_day(user_id: int):
         # Validate that user exists.
-        # user = UserService.get_user_by_id(user_id)
-
         stats = (
             TaskHistory.query.with_entities(
                 func.DATE(TaskHistory.action_date).label("day"),
-                func.count(TaskHistory.action_date).label("cnt"),
+                func.count(TaskHistory.action).label("cnt"),
             )
             .filter(TaskHistory.user_id == user_id)
-            .filter(
-                or_(
-                    TaskHistory.action == TaskAction.LOCKED_FOR_MAPPING.name,
-                    TaskHistory.action == TaskAction.LOCKED_FOR_VALIDATION.name,
-                )
-            )
+            .filter(TaskHistory.action == TaskAction.STATE_CHANGE.name)
             .filter(
                 func.DATE(TaskHistory.action_date)
                 > datetime.date.today() - datetime.timedelta(days=365)
@@ -89,10 +85,8 @@ class UserService:
         contributions = [
             UserContributionDTO(dict(date=str(s[0]), count=s[1])) for s in stats
         ]
-        dto = UserContributionsDTO()
-        dto.contributions = contributions
 
-        return dto
+        return contributions
 
     @staticmethod
     def get_project_managers() -> User:
@@ -135,13 +129,13 @@ class UserService:
 
     @staticmethod
     def get_projects_mapped(user_id: int):
-        projects_mapped = (
-            User.query.with_entities(User.projects_mapped)
-            .filter(User.id == user_id)
-            .all()
-        )
-        results = [r[0] for r in projects_mapped]
-        projects_mapped = results[0]
+        user = UserService.get_user_by_id(user_id)
+        projects_mapped = user.projects_mapped
+
+        # Return empty list if the user has no projects_mapped.
+        if projects_mapped is None:
+            return []
+
         return projects_mapped
 
     @staticmethod
@@ -193,14 +187,53 @@ class UserService:
         return requested_user.as_dto(requested_user.username)
 
     @staticmethod
+    def get_interests_stats(user_id):
+        # Get all projects that the user has contributed.
+        stmt = (
+            TaskHistory.query.with_entities(TaskHistory.project_id)
+            .distinct()
+            .filter(TaskHistory.user_id == user_id)
+        )
+
+        interests = (
+            Interest.query.with_entities(
+                Interest.id,
+                Interest.name,
+                func.count(distinct(projects_interests.c.project_id)).label(
+                    "count_projects"
+                ),
+            )
+            .outerjoin(
+                projects_interests,
+                and_(
+                    Interest.id == projects_interests.c.interest_id,
+                    projects_interests.c.project_id.in_(stmt),
+                ),
+            )
+            .group_by(Interest.id)
+            .order_by(desc("count_projects"))
+            .all()
+        )
+
+        interests_dto = [
+            InterestDTO(dict(id=i.id, name=i.name, count_projects=i.count_projects,))
+            for i in interests
+        ]
+
+        return interests_dto
+
+    @staticmethod
     def get_tasks_dto(
         user_id: int,
         start_date: datetime.datetime = None,
         end_date: datetime.datetime = None,
-        status: str = None,
+        task_status: str = None,
+        project_status: str = None,
         project_id: int = None,
+        page=1,
+        page_size=10,
         sort_by: str = None,
-    ) -> TaskDTOs:
+    ) -> UserTaskDTOs:
         base_query = (
             TaskHistory.query.with_entities(
                 TaskHistory.project_id,
@@ -222,7 +255,7 @@ class UserService:
         elif sort_by == "-action_date":
             base_query = base_query.order_by(desc(func.max(TaskHistory.action_date)))
 
-        task_dtos = TaskDTOs()
+        user_task_dtos = UserTaskDTOs()
         task_id_list = base_query.subquery()
 
         tasks = Task.query.join(
@@ -234,18 +267,30 @@ class UserService:
         )
         tasks = tasks.add_column("max_1")
 
-        if status:
-            tasks = tasks.filter(Task.task_status == TaskStatus[status.upper()].value)
+        if task_status:
+            tasks = tasks.filter(
+                Task.task_status == TaskStatus[task_status.upper()].value
+            )
+
+        if project_status:
+            tasks = tasks.filter(
+                Task.project_id == Project.id,
+                Project.status == ProjectStatus[project_status.upper()].value,
+            )
 
         if project_id:
             tasks = tasks.filter_by(project_id=project_id)
 
+        results = tasks.paginate(page, page_size, True)
+
         task_list = []
 
-        for task, action_date in tasks.all():
+        for task, action_date in results.items:
             task_list.append(task.as_dto(last_updated=action_date))
-        task_dtos.tasks = task_list
-        return task_dtos
+
+        user_task_dtos.user_tasks = task_list
+        user_task_dtos.pagination = Pagination(results)
+        return user_task_dtos
 
     @staticmethod
     def get_detailed_stats(username: str):
@@ -262,21 +307,13 @@ class UserService:
         tasks_validated = TaskHistory.query.filter(
             TaskHistory.user_id == user.id, TaskHistory.action_text == "VALIDATED"
         ).count()
+
         projects_mapped = UserService.get_projects_mapped(user.id)
-        countries_result = (
-            Project.query.with_entities(Project.country)
-            .filter(Project.id.in_(projects_mapped), Project.country.isnot(None))
-            .distinct(Project.country)
-            .all()
-        )
-        # tuple to list
-        countries_touched = [
-            country for country, in [country for country, in countries_result]
-        ]
         stats_dto.tasks_mapped = tasks_mapped
         stats_dto.tasks_validated = tasks_validated
         stats_dto.projects_mapped = len(projects_mapped)
-        stats_dto.countries_mapped = countries_touched
+        stats_dto.countries_contributed = UserService.get_countries_contributed(user.id)
+        stats_dto.contributions_by_day = UserService.get_contributions_by_day(user.id)
         stats_dto.total_time_spent = 0
         stats_dto.time_spent_mapping = 0
         stats_dto.time_spent_validating = 0
@@ -300,6 +337,8 @@ class UserService:
             if total_mapping_time:
                 stats_dto.time_spent_mapping = total_mapping_time.total_seconds()
                 stats_dto.total_time_spent += stats_dto.time_spent_mapping
+
+        stats_dto.contributions_interest = UserService.get_interests_stats(user.id)
 
         return stats_dto
 
@@ -392,6 +431,63 @@ class UserService:
             return True
 
         return False
+
+    @staticmethod
+    def get_countries_contributed(user_id: int):
+        query = (
+            TaskHistory.query.with_entities(
+                func.unnest(Project.country).label("country"),
+                TaskHistory.action_text,
+                func.count(TaskHistory.action_text).label("count"),
+            )
+            .filter(TaskHistory.user_id == user_id)
+            .filter(
+                TaskHistory.action_text.in_(
+                    [
+                        TaskStatus.MAPPED.name,
+                        TaskStatus.BADIMAGERY.name,
+                        TaskStatus.VALIDATED.name,
+                    ]
+                )
+            )
+            .group_by("country", TaskHistory.action_text)
+            .outerjoin(Project, Project.id == TaskHistory.project_id)
+            .all()
+        )
+        countries = list(set([q.country for q in query]))
+        result = []
+        for country in countries:
+            values = [q for q in query if q.country == country]
+
+            # Filter element to sum mapped values.
+            mapped = sum(
+                [
+                    v.count
+                    for v in values
+                    if v.action_text
+                    in [TaskStatus.MAPPED.name, TaskStatus.BADIMAGERY.name]
+                ]
+            )
+            validated = sum(
+                [v.count for v in values if v.action_text == TaskStatus.VALIDATED.name]
+            )
+            dto = UserCountryContributed(
+                dict(
+                    name=country,
+                    mapped=mapped,
+                    validated=validated,
+                    total=mapped + validated,
+                )
+            )
+            result.append(dto)
+
+        # Order by total
+        result = sorted(result, reverse=True, key=lambda i: i.total)
+        countries_dto = UserCountriesContributed()
+        countries_dto.countries_contributed = result
+        countries_dto.total = len(result)
+
+        return countries_dto
 
     @staticmethod
     def upsert_mapped_projects(user_id: int, project_id: int):

@@ -5,7 +5,6 @@ import { ProjectNav } from '../components/projects/projectNav';
 import { MyProjectNav } from '../components/projects/myProjectNav';
 import { MoreFiltersForm } from '../components/projects/moreFiltersForm';
 import { ProjectDetail } from '../components/projectDetail/index';
-import { ManagementMenu } from '../components/teamsAndOrgs/menu';
 import { ProjectCardPaginator } from '../components/projects/projectCardPaginator';
 import { ProjectSearchResults } from '../components/projects/projectSearchResults';
 import { ProjectsMap } from '../components/projects/projectsMap';
@@ -77,7 +76,6 @@ export const ProjectsPage = props => {
 };
 
 export const ManageProjectsPage = props => {
-  const userDetails = useSelector(state => state.auth.get('userDetails'));
   const userToken = useSelector(state => state.auth.get('token'));
 
   const initialData = {
@@ -106,14 +104,13 @@ export const ManageProjectsPage = props => {
     !fullProjectsQuery.createdByMe &&
     !fullProjectsQuery.mappedByMe &&
     !fullProjectsQuery.favoritedByMe &&
-    !fullProjectsQuery.createdByMeArchived
+    !fullProjectsQuery.status
   ) {
-    setProjectQuery({ createdByMe: true });
+    setProjectQuery({ mappedByMe: true });
   }
 
   return (
-    <div className="pull-center ph5-l bg-tan">
-      {userDetails && ['ADMIN', 'PROJECT_MANAGER'].includes(userDetails.role) && <ManagementMenu />}
+    <div className="pull-center bg-tan">
       <MyProjectNav location={props.location} orgAPIState={orgAPIState}>
         {
           props.children
@@ -127,7 +124,7 @@ export const ManageProjectsPage = props => {
           state={state}
           retryFn={forceUpdate}
           className={`${searchResultWidth} fl`}
-          showBottomButtons={true}
+          showBottomButtons={props.location && props.location.pathname.startsWith('/manage/')}
         />
         {isMapShown && (
           <ProjectsMap
@@ -176,9 +173,9 @@ export const ProjectDetailPage = props => {
     `projects/${props.id}/contributions/queries/day/`,
   );
   const [error, loading, data] = useFetch(`projects/${props.id}/`);
-  const [tasksError, tasksLoading, tasks] = useFetch(`projects/${props.id}/tasks/`);
-  const [totalMappersError, totalMappersLoading, totalMappers] = useFetch(
-    `projects/${props.id}/statistics/`,
+  /* eslint-disable-next-line */
+  const [contributorsError, contributorsLoading, contributors] = useFetch(
+    `projects/${props.id}/contributions/`,
   );
 
   if (error) return <Error error={error} />;
@@ -191,12 +188,9 @@ export const ProjectDetailPage = props => {
       userPreferences={userPreferences}
       percentDoneVisData={visualData}
       percentDoneVisLoading={visualLoading}
-      tasksError={tasksError}
-      tasks={tasks}
-      tasksLoading={tasksLoading}
-      totalMappersError={totalMappersError}
-      totalMappersLoading={totalMappersLoading}
-      totalMappers={totalMappers}
+      tasksError={error}
+      tasks={data.tasks}
+      contributors={contributors.userContributions || []}
       navigate={props.navigate}
       type="detail"
     />

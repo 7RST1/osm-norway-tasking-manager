@@ -1,7 +1,7 @@
 import { defineMessages } from 'react-intl';
 
 /**
- * Internationalized messages for use on header.
+ * Internationalized messages for use on user components.
  */
 export default defineMessages({
   mapper: {
@@ -251,6 +251,22 @@ export default defineMessages({
   emailConfirmationMsg: {
     id: 'user.settings.email.confirmation',
     defaultMessage: 'Please check your email account in order to confirm your email address.',
+  },
+  myProjects: {
+    id: 'users.detail.MyProjects',
+    defaultMessage: 'My projects',
+  },
+  myTasks: {
+    id: 'users.detail.MyTasks',
+    defaultMessage: 'My tasks',
+  },
+  myContribs: {
+    id: 'users.detail.MyContribs',
+    defaultMessage: 'My contributions',
+  },
+  myStats: {
+    id: 'users.detail.MyStats',
+    defaultMessage: 'My stats',
   },
 });
 // It will be useful when we enable the placeholders

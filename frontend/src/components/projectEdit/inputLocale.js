@@ -1,9 +1,14 @@
 import React, { useState, useLayoutEffect, useCallback, useContext } from 'react';
+import { FormattedMessage } from 'react-intl';
+
+import messages from './messages';
 import { htmlFromMarkdown } from '../../utils/htmlFromMarkdown';
 import { StateContext, styleClasses } from '../../views/projectEdit';
 
 export const InputLocale = props => {
-  const { projectInfo, setProjectInfo } = useContext(StateContext);
+  const { projectInfo, setProjectInfo, success, setSuccess, error, setError } = useContext(
+    StateContext,
+  );
   const [language, setLanguage] = useState(null);
   const [value, setValue] = useState('');
   const [preview, setPreview] = useState(null);
@@ -31,12 +36,20 @@ export const InputLocale = props => {
       const html = htmlFromMarkdown(e.target.value);
       setPreview(html);
     }
+    if (success !== false) {
+      setSuccess(false);
+    }
+    if (error !== null) {
+      setError(null);
+    }
   };
 
   // Resets preview when language changes.
   useLayoutEffect(() => {
     setPreview(null);
-  }, [language]);
+    setSuccess(false);
+    setError(null);
+  }, [language, setSuccess, setError]);
 
   const getValue = useCallback(() => {
     const data = locales.filter(l => l.locale === language);
@@ -65,8 +78,9 @@ export const InputLocale = props => {
       <ul className="list mb4 pa0 w-100 flex flex-wrap ttu">
         {props.languages === null
           ? null
-          : props.languages.map(l => (
+          : props.languages.map((l, n) => (
               <li
+                key={n}
                 onClick={() => setLanguage(l.code)}
                 className={
                   (l.code !== language ? 'bg-white blue-dark' : 'bg-blue-dark white') +
@@ -96,14 +110,26 @@ export const InputLocale = props => {
           value={value}
           onBlur={updateState}
           onChange={handleChange}
+          maxLength={props.maxLength || null}
         ></textarea>
+      )}
+      {props.maxLength && (
+        <div
+          className={`tr cf fl w-80 f7 ${
+            value.length > 0.9 * props.maxLength ? 'red' : 'blue-light'
+          }`}
+        >
+          {value.length} / {props.maxLength}
+        </div>
       )}
 
       {preview && (
-        <>
-          <h3 className="ttu f6 fw6 blue-grey mb1">Preview:</h3>
-          <div dangerouslySetInnerHTML={preview} className="pa2 bg-grey-light blue-dark" />
-        </>
+        <div className="cf pt1">
+          <h3 className="ttu f6 fw6 blue-grey mb1">
+            <FormattedMessage {...messages.preview} />
+          </h3>
+          <div dangerouslySetInnerHTML={preview} className="pv1 ph3 bg-grey-light blue-dark" />
+        </div>
       )}
     </div>
   );

@@ -4,6 +4,14 @@ import { defineMessages } from 'react-intl';
  * Internationalized messages for use on project cards.
  */
 export default defineMessages({
+  projectCoordination: {
+    id: 'project.detail.coordination',
+    defaultMessage: 'This project is coordinated by {organisation}',
+  },
+  noProjectTeams: {
+    id: 'project.detail.teams.empty',
+    defaultMessage: "This project doesn't have any teams associated with.",
+  },
   projectTotalContributors: {
     id: 'project.detail.contributorCount',
     defaultMessage: '{number} total contributors',
@@ -14,11 +22,11 @@ export default defineMessages({
   },
   percentMapped: {
     id: 'project.detail.percentMapped',
-    defaultMessage: ' Mapped',
+    defaultMessage: 'Mapped',
   },
   percentValidated: {
     id: 'project.detail.percentValidated',
-    defaultMessage: ' Validated',
+    defaultMessage: 'Validated',
   },
   projectPriorityURGENT: {
     id: 'project.detail.projectPriorityUrgent',
@@ -88,6 +96,10 @@ export default defineMessages({
     id: 'project.readMoreButton',
     defaultMessage: 'Read more',
   },
+  readLess: {
+    id: 'project.readLessButton',
+    defaultMessage: 'Read less',
+  },
   addToFavorites: {
     id: 'project.detail.addToFavorites',
     defaultMessage: 'Add to Favorites',
@@ -99,7 +111,7 @@ export default defineMessages({
   noComments: {
     id: 'project.detail.questionsAndComments.none',
     defaultMessage:
-      'There are no questions or comments on this project yet. Be the first to post one!',
+      'There are currently no questions or comments on this project. Be the first to post one!',
   },
   post: {
     id: 'project.detail.questionsAndComments.button',
@@ -108,6 +120,10 @@ export default defineMessages({
   share: {
     id: 'project.detail.share',
     defaultMessage: 'Share',
+  },
+  teams: {
+    id: 'project.detail.teams',
+    defaultMessage: 'Teams',
   },
   zoomToTasks: {
     id: 'project.detail.zoomToTasks',
@@ -119,26 +135,25 @@ export default defineMessages({
   },
   mapThroughOSMCardTitle: {
     id: 'project.detail.cards.mapthroughosm.title',
-    defaultMessage: '2. Map through OpenStreetMap',
+    defaultMessage: '2. Map with OpenStreetMap',
   },
   submitYourWorkCardTitle: {
     id: 'project.detail.cards.submityourwork.title',
-    defaultMessage: '3. Submit your Work',
+    defaultMessage: '3. Submit your work',
   },
   selectATaskCardDescription: {
     id: 'project.detail.cards.selectATask.description',
     defaultMessage:
-      'Projects are subdivided into a set of tasks managable in size and adapted to your skill level.',
+      'Projects are divided in a set of smaller tasks and adapted to your skill level.',
   },
   mapThroughOSMCardDescription: {
     id: 'project.detail.cards.mapthroughosm.description',
     defaultMessage:
-      'If you are new to mapping, we recommend checking the Learn page before you start mapping.',
+      'If you are new to mapping, we recommend checking the Learn page for instructions before you begin.',
   },
   submitYourWorkCardDescription: {
     id: 'project.detail.cards.submityourwork.description',
-    defaultMessage:
-      "Submitting your work is cruicial. If you don't do it, it will not be merged into the project.",
+    defaultMessage: 'Submitting your work is crucial to make sure your data is saved.',
   },
   overview: {
     id: 'project.detail.sections.overview',

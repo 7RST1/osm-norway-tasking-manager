@@ -4,7 +4,9 @@ from schematics.types import StringType, IntType, EmailType, LongType, BooleanTy
 
 from schematics.types.compound import ListType, ModelType, BaseType
 from server.models.dtos.stats_dto import Pagination
+from server.models.dtos.mapping_dto import TaskDTO
 from server.models.postgis.statuses import MappingLevel, UserRole
+from server.models.dtos.interests_dto import InterestDTO
 
 
 def is_known_mapping_level(value):
@@ -13,7 +15,9 @@ def is_known_mapping_level(value):
         return True
 
     try:
-        MappingLevel[value.upper()]
+        value = value.split(",")
+        for level in value:
+            MappingLevel[level.upper()]
     except KeyError:
         raise ValidationError(
             f"Unknown mappingLevel: {value} Valid values are {MappingLevel.BEGINNER.name}, "
@@ -24,10 +28,12 @@ def is_known_mapping_level(value):
 def is_known_role(value):
     """ Validates that supplied user role is known value """
     try:
-        UserRole[value.upper()]
+        value = value.split(",")
+        for role in value:
+            UserRole[role.upper()]
     except KeyError:
         raise ValidationError(
-            f"Unknown mappingLevel: {value} Valid values are {UserRole.ADMIN.name}, "
+            f"Unknown mappingRole: {value} Valid values are {UserRole.ADMIN.name}, "
             f"{UserRole.PROJECT_MANAGER.name}, {UserRole.MAPPER.name}, {UserRole.VALIDATOR.name}"
         )
 
@@ -90,6 +96,33 @@ class UserDTO(Model):
         return value
 
 
+class UserCountryContributed(Model):
+    """ DTO for country a user has contributed """
+
+    name = StringType(required=True)
+    mapped = IntType(required=True)
+    validated = IntType(required=True)
+    total = IntType(required=True)
+
+
+class UserCountriesContributed(Model):
+    """ DTO for countries a user has contributed """
+
+    def __init__(self):
+        super().__init__()
+        self.countries_contributed = []
+
+    countries_contributed = ListType(
+        ModelType(UserCountryContributed), serialized_name="countries"
+    )
+    total = IntType()
+
+
+class UserContributionDTO(Model):
+    date = StringType()
+    count = IntType()
+
+
 class UserStatsDTO(Model):
     """ DTO containing statistics about the user """
 
@@ -97,9 +130,17 @@ class UserStatsDTO(Model):
     time_spent_mapping = IntType(serialized_name="timeSpentMapping")
     time_spent_validating = IntType(serialized_name="timeSpentValidating")
     projects_mapped = IntType(serialized_name="projectsMapped")
-    countries_mapped = IntType(serialized_name="countriesMapped")
+    countries_contributed = ModelType(
+        UserCountriesContributed, serialized_name="countriesContributed"
+    )
+    contributions_by_day = ListType(
+        ModelType(UserContributionDTO), serialized_name="contributionsByDay"
+    )
     tasks_mapped = IntType(serialized_name="tasksMapped")
     tasks_validated = IntType(serialized_name="tasksValidated")
+    contributions_interest = ListType(
+        ModelType(InterestDTO), serialized_name="ContributionsByInterest"
+    )
 
 
 class UserOSMDTO(Model):
@@ -170,23 +211,6 @@ class UserSearchQuery(Model):
         return hash((self.username, self.role, self.mapping_level, self.page))
 
 
-class UserContributionDTO(Model):
-    date = StringType()
-    count = IntType()
-
-
-class UserContributionsDTO(Model):
-    """ DTO for projects a user has mapped """
-
-    def __init__(self):
-        super().__init__()
-        self.contributions = []
-
-    contributions = ListType(
-        ModelType(UserContributionDTO), serialized_name="contributions"
-    )
-
-
 class ListedUser(Model):
     """ Describes a user within the User List """
 
@@ -236,3 +260,15 @@ class UserFilterDTO(Model):
     pagination = ModelType(Pagination)
     usernames = ListType(StringType)
     users = ListType(ModelType(ProjectParticipantUser))
+
+
+class UserTaskDTOs(Model):
+    """ Describes an array of Task DTOs"""
+
+    def __init__(self):
+        """ DTO constructor initialise all arrays to empty"""
+        super().__init__()
+        self.user_tasks = []
+
+    user_tasks = ListType(ModelType(TaskDTO), serialized_name="tasks")
+    pagination = ModelType(Pagination)

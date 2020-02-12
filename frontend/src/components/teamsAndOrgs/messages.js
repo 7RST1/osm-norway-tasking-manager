@@ -1,7 +1,7 @@
 import { defineMessages } from 'react-intl';
 
 /**
- * Internationalized messages for use on header.
+ * Internationalized messages for use on teams and orgs.
  */
 export default defineMessages({
   notAllowed: {
@@ -20,9 +20,25 @@ export default defineMessages({
     id: 'management.members',
     defaultMessage: 'Members',
   },
+  mappingTeams: {
+    id: 'management.teams.mapping',
+    defaultMessage: 'Mapping teams',
+  },
+  validationTeams: {
+    id: 'management.teams.validation',
+    defaultMessage: 'Validation teams',
+  },
   teamMembers: {
     id: 'management.teams.members',
     defaultMessage: 'Team members',
+  },
+  joinRequests: {
+    id: 'management.teams.join_requests',
+    defaultMessage: 'Join requests',
+  },
+  noRequests: {
+    id: 'management.teams.join_requests.empty',
+    defaultMessage: "There isn't requests to join the team.",
   },
   teams: {
     id: 'management.teams',
@@ -46,7 +62,7 @@ export default defineMessages({
   },
   editMembersLater: {
     id: 'management.edit_members',
-    defaultMessage: 'You will be able to add more users after save for the first time.',
+    defaultMessage: 'You will be able to add more users after you save for the first time.',
   },
   myOrganisations: {
     id: 'management.myOrganisations',
@@ -63,6 +79,14 @@ export default defineMessages({
   delete: {
     id: 'management.buttons.delete',
     defaultMessage: 'Delete',
+  },
+  accept: {
+    id: 'management.buttons.accept',
+    defaultMessage: 'Accept',
+  },
+  reject: {
+    id: 'management.buttons.reject',
+    defaultMessage: 'Reject',
   },
   viewAll: {
     id: 'management.links.viewAll',
@@ -142,11 +166,11 @@ export default defineMessages({
   },
   noTeams: {
     id: 'management.teams.no_teams',
-    defaultMessage: 'You are not member of a team yet.',
+    defaultMessage: 'You are not a member of a team yet.',
   },
   noCampaigns: {
     id: 'management.teams.no_campaigns',
-    defaultMessage: 'There is no campaigns yet.',
+    defaultMessage: 'There are no campaigns yet.',
   },
   public: {
     id: 'management.teams.visibility.public',
@@ -156,13 +180,13 @@ export default defineMessages({
     id: 'management.teams.visibility.private',
     defaultMessage: 'Private',
   },
-  secret: {
-    id: 'management.teams.visibility.secret',
-    defaultMessage: 'Secret',
-  },
   inviteOnlyDescription: {
     id: 'management.teams.invite_only.description',
-    defaultMessage: 'Managers need to approve members requests to join',
+    defaultMessage: "Managers need to approve a member's request to join.",
+  },
+  waitingApproval: {
+    id: 'teamsAndOrgs.management.teams.messages.waiting_approval',
+    defaultMessage: 'Your request to join this team is waiting for approval.',
   },
   noProjectsFound: {
     id: 'management.projects.no_found',

@@ -20,8 +20,7 @@ def validate_team_visibility(value):
         raise ValidationError(
             f"Unknown teamVisibility: {value} Valid values are "
             f"{TeamVisibility.PUBLIC.name}, "
-            f"{TeamVisibility.PRIVATE.name}, "
-            f"{TeamVisibility.SECRET.name}"
+            f"{TeamVisibility.PRIVATE.name}"
         )
 
 
@@ -57,8 +56,8 @@ class TeamProjectDTO(Model):
 class ProjectTeamDTO(Model):
     """ Describes a JSON model to create a project team """
 
-    team_id = IntType(required=True)
-    team_name = StringType(required=True)
+    team_id = IntType(required=True, serialized_name="teamId")
+    team_name = StringType(serialized_name="name")
     role = StringType(required=True)
 
 
@@ -94,7 +93,7 @@ class TeamDTO(Model):
     """ Describes JSON model for a team """
 
     team_id = IntType(serialized_name="teamId")
-    organisation_id = IntType(required=True)
+    organisation_id = IntType(required=True, serialized_name="organisationId")
     organisation = StringType(required=True)
     name = StringType(required=True)
     logo = StringType()

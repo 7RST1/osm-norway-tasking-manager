@@ -1,9 +1,13 @@
 import { defineMessages } from 'react-intl';
 
 /**
- * Internationalized messages for use on header.
+ * Internationalized messages for use on general components.
  */
 export default defineMessages({
+  language: {
+    id: 'localeSelect.language',
+    defaultMessage: 'Language',
+  },
   selectOrganisation: {
     id: 'formInputs.organisation.select',
     defaultMessage: 'Select organisation',
@@ -11,7 +15,7 @@ export default defineMessages({
   definition: {
     id: 'foooter.definition',
     defaultMessage:
-      'Tasking Manager is a platform where people can help humanitarian causes by mapping in OpenStreetMap.',
+      'Tasking Manager is a platform where individuals can support humanitarian response by mapping in OpenStreetMap.',
   },
   credits: {
     id: 'footer.credits',
@@ -26,7 +30,7 @@ export default defineMessages({
     defaultMessage: 'Learn more about OpenStreetMap.',
   },
   mappingLevelALL: {
-    id: 'project.level.all',
+    id: 'mapping.level.all',
     defaultMessage: 'All levels',
   },
   mappingLevelADVANCED: {

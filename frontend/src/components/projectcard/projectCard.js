@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { FormattedMessage, FormattedRelative } from 'react-intl';
 import { Link } from '@reach/router';
 
@@ -8,6 +8,7 @@ import ProjectProgressBar from './projectProgressBar';
 import { MappingLevelMessage } from '../mappingLevel';
 import messages from './messages';
 import { PROJECTCARD_CONTRIBUTION_SHOWN_THRESHOLD } from '../../config/index';
+import { isUserAdminOrPM } from '../../utils/userPermissions';
 
 export function PriorityBox({ priority, extraClasses }: Object) {
   let color = 'blue-grey';
@@ -73,6 +74,7 @@ export function ProjectCard({
   cardWidthClass = 'w-25-l',
   showBottomButtons = false,
 }: Object) {
+  const userDetails = useSelector(state => state.auth.get('userDetails'));
   const [isHovered, setHovered] = useState(false);
   const linkCombo = 'link ph3 f6 pv2 ba b--grey-light';
 
@@ -81,12 +83,21 @@ export function ProjectCard({
   const bottomButtonMargin = showBottomButtons ? 'pb0' : 'pb3';
   const bottomButtons = (
     <div className="absolute bottom-0 w-100 pr3">
-      <Link
-        to={`/manage/projects/${projectId}`}
-        className={`fl f6 di w-50 tc bg-grey-light blue-grey bn ${linkCombo}`}
-      >
-        <FormattedMessage {...messages.editProject} />
-      </Link>
+      {userDetails && isUserAdminOrPM(userDetails.role) ? (
+        <Link
+          to={`/manage/projects/${projectId}`}
+          className={`fl f6 di w-50 tc bg-grey-light blue-grey bn ${linkCombo}`}
+        >
+          <FormattedMessage {...messages.editProject} />
+        </Link>
+      ) : (
+        <Link
+          to={`/projects/${projectId}`}
+          className={`fl f6 di w-50 tc bg-grey-light blue-grey bn ${linkCombo}`}
+        >
+          <FormattedMessage {...messages.projectPage} />
+        </Link>
+      )}
       <Link
         to={`/projects/${projectId}/tasks`}
         className={`fr f6 di w-50 tc bg-red white bn ${linkCombo}`}
@@ -105,10 +116,10 @@ export function ProjectCard({
       <Link className={`no-underline color-inherit `} to={`/projects/${projectId}`}>
         <article className={``}>
           <div className={`${bottomButtonSpacer} ph3 ba br1 b--grey-light bg-white shadow-hover`}>
-            <div className="mt3 w-33 fr">
-              <PriorityBox priority={priority} extraClasses={'pv1 ph2'} />
+            <div className="mt3 fr">
+              <PriorityBox priority={priority} extraClasses={'pv1 ph2 dib'} />
             </div>
-            <div className="w-50 red dib">
+            <div className="w-50 cf red dib">
               <img
                 className="h2 mw4 pa1"
                 src={organisationLogo}
@@ -116,8 +127,8 @@ export function ProjectCard({
               />
             </div>
             <div className="ma1 w-100">
-              <div className="f7 blue-grey">#{projectId}</div>
-              <h3 title={name} className="pb2 f5 fw6 h3 lh-title overflow-y-hidden">
+              <div className="f7 blue-grey mt2">#{projectId}</div>
+              <h3 title={name} className="pb2 mt2 f5 fw6 h3 lh-title overflow-y-hidden">
                 {name}
               </h3>
               <div className="tc f6">

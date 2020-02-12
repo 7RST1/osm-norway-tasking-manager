@@ -141,6 +141,7 @@ def add_api_endpoints(app):
         ProjectsQueriesNoGeometriesAPI,
         ProjectsQueriesNoTasksAPI,
         ProjectsQueriesAoiAPI,
+        ProjectsQueriesPriorityAreasAPI,
         ProjectsQueriesFeaturedAPI,
     )
     from server.api.projects.activities import (
@@ -320,6 +321,10 @@ def add_api_endpoints(app):
         ProjectsQueriesAoiAPI, format_url("projects/<int:project_id>/queries/aoi/")
     )
     api.add_resource(
+        ProjectsQueriesPriorityAreasAPI,
+        format_url("projects/<int:project_id>/queries/priority-areas/"),
+    )
+    api.add_resource(
         ProjectsQueriesFeaturedAPI, format_url("projects/queries/featured/")
     )
 
@@ -359,8 +364,8 @@ def add_api_endpoints(app):
     )
     api.add_resource(
         ProjectsTeamsAPI,
-        format_url("projects/<int:project_id>/teams/<int:team_id>/"),
-        methods=["PUT", "DELETE", "PATCH"],
+        "/api/v2/projects/<int:project_id>/teams/<int:team_id>/",
+        methods=["POST", "DELETE", "PATCH"],
     )
     api.add_resource(
         ProjectsCampaignsAPI,
@@ -629,7 +634,7 @@ def add_api_endpoints(app):
     api.add_resource(
         TeamsActionsJoinAPI,
         format_url("teams/<int:team_id>/actions/join/"),
-        methods=["POST", "PUT"],
+        methods=["POST", "PATCH"],
     )
     api.add_resource(
         TeamsActionsLeaveAPI,

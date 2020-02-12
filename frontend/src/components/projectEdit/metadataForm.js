@@ -1,11 +1,15 @@
-import React, { useContext, useState, useLayoutEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 
+import messages from './messages';
 import { StateContext, styleClasses, handleCheckButton } from '../../views/projectEdit';
-import { Button } from '../button';
-import { API_URL } from '../../config';
+import { ProjectInterests } from './projectInterests';
+import { fetchLocalJSONAPI } from '../../network/genericJSONRequest';
 
 export const MetadataForm = () => {
   const { projectInfo, setProjectInfo } = useContext(StateContext);
+  const [interests, setInterests] = useState([]);
+
   const elements = [
     { item: 'ROADS', showItem: 'Roads' },
     { item: 'BUILDINGS', showItem: 'Buildings' },
@@ -13,19 +17,6 @@ export const MetadataForm = () => {
     { item: 'LANDUSE', showItem: 'Landuse' },
     { item: 'OTHER', showItem: 'Other' },
   ];
-
-  const [orgs, setOrgs] = useState([{ organisationId: 0, name: '' }]);
-
-  useLayoutEffect(() => {
-    const fetchOrgs = async () => {
-      const res = await fetch(`${API_URL}organisations/`);
-      if (res.status === 200) {
-        const orgs_json = await res.json();
-        setOrgs(o => o.concat(orgs_json.organisations));
-      }
-    };
-    fetchOrgs();
-  }, [setOrgs]);
 
   const mapperLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 
@@ -36,34 +27,49 @@ export const MetadataForm = () => {
     setProjectInfo({ ...projectInfo, mappingTypes: types });
   };
 
+  useEffect(() => {
+    if (interests.length === 0) {
+      fetchLocalJSONAPI('interests/').then(res => {
+        setInterests(res.interests);
+      });
+    }
+  }, [interests.length]);
+
   return (
     <div className="w-100">
-      <p>
-        Metadata and tags are used to allow users to find projects to work on and group projects.
-      </p>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Mapper level</label>
-        {mapperLevels.map(e => (
-          <Button
-            className={
-              e === projectInfo.mapperLevel ? 'bg-blue-dark white mr2' : 'bg-white blue-dark mr2'
-            }
-            onClick={() => setProjectInfo({ ...projectInfo, mapperLevel: e })}
-          >
-            {e}
-          </Button>
-        ))}
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.mapperLevel} />
+        </label>
         <p className={styleClasses.pClass}>
-          Setting the level will help the mappers find suitable projects to work on. You can enforce
-          the level required for mapping in the permissions section.
+          <FormattedMessage {...messages.mapperLevelDescription} />
         </p>
+        {mapperLevels.map(level => (
+          <label className="db pv2" key={level}>
+            <input
+              value={level}
+              checked={projectInfo.mapperLevel === level}
+              onChange={() =>
+                setProjectInfo({
+                  ...projectInfo,
+                  mapperLevel: level,
+                })
+              }
+              type="radio"
+              className={`radio-input input-reset pointer v-mid dib h2 w2 mr2 br-100 ba b--blue-light`}
+            />
+            <FormattedMessage {...messages[`mapperLevel${level}`]} />
+          </label>
+        ))}
       </div>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Type(s) of mapping *</label>
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.mappingTypes} />*
+        </label>
         {elements.map(elm => (
           <label className="db pv2">
             <input
-              className="mr2"
+              className="mr2 h"
               name="mapping_types"
               checked={projectInfo.mappingTypes.includes(elm.item)}
               onChange={handleMappingTypes}
@@ -74,38 +80,28 @@ export const MetadataForm = () => {
           </label>
         ))}
       </div>
-      <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>Organisation</label>
-        <p className={styleClasses.pClass}>Only one organisationis allowed.</p>
-        <select
-          name="LicenseId"
-          className="pa2"
-          onChange={e => setProjectInfo({ ...projectInfo, organisation: parseInt(e.target.value) })}
-        >
-          {orgs.map(o => (
-            <option
-              selected={projectInfo.organisation === o.organisationId ? true : false}
-              value={o.organisationId}
-            >
-              {o.name}
-            </option>
-          ))}
-        </select>
+      <div className={styleClasses.divClass.replace('w-70', 'w-80')}>
+        <label className={styleClasses.labelClass}>Interests</label>
+        <ProjectInterests
+          interests={interests}
+          projectInterests={projectInfo.interests}
+          setProjectInfo={setProjectInfo}
+          setInterests={setInterests}
+        />
       </div>
       <div className={styleClasses.divClass}>
-        <label className={styleClasses.labelClass}>OSMCha Filter Id</label>
+        <label className={styleClasses.labelClass}>
+          <FormattedMessage {...messages.osmchaFilterId} />
+        </label>
+        <p className={styleClasses.pClass}>
+          <FormattedMessage {...messages.osmchaFilterIdDescription} />
+        </p>
         <input
           className={styleClasses.inputClass}
           type="text"
           name="osmchaFilterId"
           value={projectInfo.osmchaFilterId}
         />
-        <p className={styleClasses.pClass}>
-          Optional id of a saved OSMCha filter to apply when viewing the project in OSMCha, if you
-          desire custom filtering. Note that this replaces all standard filters. Example:
-          095e8b31-b3cb-4b36-a106-02826fb6a109 (for convenience, you can also paste an OSMCha URL
-          here that uses a saved filter and the filter id will be extracted for you).
-        </p>
       </div>
     </div>
   );

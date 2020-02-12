@@ -1,7 +1,7 @@
 import { defineMessages } from 'react-intl';
 
 /**
- * Internationalized messages for use on header.
+ * Internationalized messages for use on task selection.
  */
 export default defineMessages({
   lockError: {
@@ -15,27 +15,27 @@ export default defineMessages({
   },
   anotherLockedTask: {
     id: 'project.tasks.lock_error.another_project',
-    defaultMessage: 'We found another task locked by you',
+    defaultMessage: 'We found another mapping task already locked by you',
   },
   anotherProjectLockTextSingular: {
     id: 'project.tasks.lock_error.another_project.description.singular',
     defaultMessage:
-      'It is on the Project #{project}. You will need to update the status of that task before moving on to the next one.',
+      'It is on the Project #{project}. You will need to update the status of that task before you can map another task.',
   },
   anotherProjectLockTextPlural: {
     id: 'project.tasks.lock_error.another_project.description.plural',
     defaultMessage:
-      'It is on the Project #{project}. You will need to update the status of those tasks before moving on to the next one.',
+      'It is on the Project #{project}. You will need to update the status of that task before you can map another task.',
   },
   currentProjectLockTextSingular: {
     id: 'project.tasks.lock_error.current_project.description.singular',
     defaultMessage:
-      'The task #{taskId} was previously locked by you. You will need to update the status of that task before moving on to the next one.',
+      'The task #{taskId} was previously locked by you. You will need to update the status of that task before you can map another task.',
   },
   currentProjectLockTextPlural: {
     id: 'project.tasks.lock_error.current_project.description.plural',
     defaultMessage:
-      'Some tasks were previously locked by you on this project. You will need to update the status of those tasks before moving on to the next one.',
+      'Some tasks were previously locked by you on this project. You will need to update the status of those tasks before you can map another task.',
   },
   goToProject: {
     id: 'project.tasks.lock_error.go_to_project.button',
@@ -85,6 +85,10 @@ export default defineMessages({
     id: 'project.editor.select',
     defaultMessage: 'Select editor',
   },
+  startAnotherEditor: {
+    id: 'project.editor.start_another_editor',
+    defaultMessage: 'Start another editor',
+  },
   task: {
     id: 'project.task',
     defaultMessage: 'Task',
@@ -100,6 +104,10 @@ export default defineMessages({
   instructions: {
     id: 'project.instructions',
     defaultMessage: 'Instructions',
+  },
+  contributions: {
+    id: 'project.contributions',
+    defaultMessage: 'contributions',
   },
   imagery: {
     id: 'project.imagery',
@@ -165,6 +173,10 @@ export default defineMessages({
     id: 'project.tasks.list.lastUpdate',
     defaultMessage: 'Last updated by {user}',
   },
+  taskStatus_PRIORITY_AREAS: {
+    id: 'project.tasks.priority_areas',
+    defaultMessage: 'Priority areas',
+  },
   taskStatus_READY: {
     id: 'project.tasks.status.ready',
     defaultMessage: 'Available for mapping',
@@ -199,7 +211,7 @@ export default defineMessages({
   },
   taskStatus_SPLIT: {
     id: 'project.tasks.status.split',
-    defaultMessage: 'Splitted',
+    defaultMessage: 'Split',
   },
   sortById: {
     id: 'project.tasks.sorting.id',
@@ -263,11 +275,11 @@ export default defineMessages({
   },
   badImagery: {
     id: 'project.tasks.action.options.bad_imagery',
-    defaultMessage: "It wasn't possible to map due to bad imagery",
+    defaultMessage: 'It was not possible to map due to poor imagery',
   },
   incomplete: {
     id: 'project.tasks.action.options.mapping_incomplete',
-    defaultMessage: "I couldn't map everything",
+    defaultMessage: 'I could not map everything',
   },
   completelyMapped: {
     id: 'project.tasks.action.options.mapping_complete',
@@ -345,12 +357,40 @@ export default defineMessages({
     id: 'project.tasks.action.map',
     defaultMessage: 'Map',
   },
+  mapped: {
+    id: 'project.tasks.action.mapped',
+    defaultMessage: 'Mapped',
+  },
   validate: {
     id: 'project.tasks.action.validate',
     defaultMessage: 'Validate',
   },
+  validated: {
+    id: 'project.tasks.action.validated',
+    defaultMessage: 'Validated',
+  },
+  total: {
+    id: 'project.tasks.number.total',
+    defaultMessage: 'Total',
+  },
   lockedBy: {
     id: 'project.tasks.locked_by_user',
     defaultMessage: '{lockStatus} by {user}',
+  },
+  mappingLevelALL: {
+    id: 'project.level.all',
+    defaultMessage: 'All levels',
+  },
+  mappingLevelADVANCED: {
+    id: 'project.level.advanced',
+    defaultMessage: 'Advanced',
+  },
+  mappingLevelINTERMEDIATE: {
+    id: 'project.level.intermediate',
+    defaultMessage: 'Intermediate',
+  },
+  mappingLevelBEGINNER: {
+    id: 'project.level.beginner',
+    defaultMessage: 'Beginner',
   },
 });

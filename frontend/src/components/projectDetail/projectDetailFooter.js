@@ -9,9 +9,12 @@ import { AddToFavorites } from './favorites';
 
 export const ProjectDetailFooter = props => {
   return (
-    <div className={`${props.className || ''} cf bt b--grey-light pl4 w-100 z-4 bg-white`}>
+    <div
+      className={`${props.className ||
+        ''} cf bt b--grey-light pl4 w-100 z-4 bg-white fixed bottom-0 left-0`}
+    >
       {/* TODO ADD ANCHORS */}
-      <div className="dib-l fl w-60 dn pt3 mt2">
+      <div className="dib-ns fl w-60-ns dn pt3 mt2">
         <a className="link blue-dark" href="#top">
           <FormattedMessage {...messages.overview} />
         </a>
@@ -22,6 +25,10 @@ export const ProjectDetailFooter = props => {
         <span className="ph2">&#183;</span>
         <a className="link blue-dark" href="#questionsAndComments">
           <FormattedMessage {...messages.questionsAndComments} />
+        </a>
+        <span className="ph2">&#183;</span>
+        <a className="link blue-dark" href="#teams">
+          <FormattedMessage {...messages.teams} />
         </a>
         <span className="ph2">&#183;</span>
         <a className="link blue-dark" href="#contributions">
